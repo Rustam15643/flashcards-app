@@ -19,8 +19,8 @@ export default function StudyPage() {
   const navigate = useNavigate();
 
   const [wordSet, setWordSet] = useState(null);
-  const [deck, setDeck] = useState([]);       // current active cards (limited)
-  const [pool, setPool] = useState([]);       // remaining cards not yet shown
+  const [deck, setDeck] = useState([]);
+  const [pool, setPool] = useState([]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [knowCount, setKnowCount] = useState(0);
@@ -63,24 +63,18 @@ export default function StudyPage() {
   const handleKnow = () => {
     const newKnow = knowCount + 1;
     setKnowCount(newKnow);
-
-    // Fill from pool
     const newDeck = [...deck];
     newDeck.splice(index, 1);
-
     let newPool = [...pool];
     if (newPool.length > 0) {
       const next = newPool.shift();
       newDeck.push(next);
     }
-
     setPool(newPool);
-
     if (newDeck.length === 0) {
       setDone(true);
       return;
     }
-
     const nextIndex = index >= newDeck.length ? newDeck.length - 1 : index;
     setDeck(newDeck);
     setIndex(nextIndex);
@@ -131,19 +125,16 @@ export default function StudyPage() {
   if (loading) return <div className="dot-bg"><div className="page" style={{textAlign:'center',paddingTop:80,color:'var(--muted)'}}>Yuklanmoqda...</div></div>;
 
   const total = wordSet?.words.length || 0;
-  const remaining = deck.length + pool.length;
   const progress = total > 0 ? Math.round((knowCount / total) * 100) : 0;
 
   return (
     <div className="dot-bg">
       <div className="page">
-        {/* Header */}
         <header className={styles.header}>
-          <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate(-1)}>← Orqaga</button>
+          <button className={`btn btn-ghost ${styles.backBtn}`} onClick={() => navigate(-1)}>← Orqaga</button>
           <h2 className={styles.title}>{wordSet?.title}</h2>
         </header>
 
-        {/* Stats */}
         <div className={`card ${styles.stats}`}>
           <div className={styles.stat}>
             <div className={styles.statNum}>{total}</div>
@@ -162,7 +153,6 @@ export default function StudyPage() {
           </div>
         </div>
 
-        {/* Options row */}
         <div className={styles.options}>
           <label className={styles.toggle}>
             <input type="checkbox" checked={isShuffle} onChange={toggleShuffle} />
@@ -176,7 +166,6 @@ export default function StudyPage() {
           </label>
         </div>
 
-        {/* Card or done state */}
         {done ? (
           <div className={`${styles.doneBox} fade-up`}>
             <div className={styles.doneEmoji}>🎉</div>
@@ -195,7 +184,6 @@ export default function StudyPage() {
           <>
             <div className={styles.counter}>{index + 1} / {deck.length} {pool.length > 0 ? `(+${pool.length} navbatda)` : ""}</div>
 
-            {/* Flashcard */}
             <div className={`${styles.scene} ${flipped ? styles.flipped : ""}`} onClick={handleFlip}>
               <div className={styles.inner}>
                 <div className={`${styles.face} ${styles.front}`}>
@@ -210,7 +198,6 @@ export default function StudyPage() {
               </div>
             </div>
 
-            {/* Nav */}
             <div className={styles.nav}>
               <button className="btn btn-ghost" onClick={handlePrev} disabled={index === 0}>←</button>
               <button className={`btn ${styles.btnAgain}`} onClick={handleAgain}>↩ Qayta</button>
