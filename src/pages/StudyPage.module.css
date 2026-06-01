@@ -6,6 +6,7 @@
   font-size: 0.82rem;
   padding: 7px 14px;
   margin-bottom: 10px;
+  direction: ltr;
 }
 
 .title {
@@ -125,11 +126,10 @@
 }
 
 .front { background: var(--surface2); }
-back {
-  font-size: 0.82rem;
-  padding: 7px 14px;
-  margin-bottom: 10px;
-  direction: ltr;
+.back {
+  background: #1a2535;
+  transform: rotateY(180deg);
+  border-color: rgba(96,184,240,0.2);
 }
 
 .word {
