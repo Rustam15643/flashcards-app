@@ -4,11 +4,13 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
+const mapDocs = (snap) => snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
 // ── Folders ──────────────────────────────────────────────
 export async function getFolders(uid) {
   const q = query(collection(db, "users", uid, "folders"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return mapDocs(snap);
 }
 
 export async function addFolder(uid, name) {
@@ -36,7 +38,7 @@ export async function getWordSets(uid, folderId) {
     orderBy("createdAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return mapDocs(snap);
 }
 
 export async function addWordSet(uid, folderId, { title, words, limit }) {

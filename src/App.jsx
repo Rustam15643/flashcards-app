@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import Loading from "./components/Loading";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import FolderPage from "./pages/FolderPage";
@@ -7,11 +8,7 @@ import StudyPage from "./pages/StudyPage";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
-  if (user === undefined) return (
-    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--muted)'}}>
-      Yuklanmoqda...
-    </div>
-  );
+  if (user === undefined) return <Loading />;
   return user ? children : <Navigate to="/login" />;
 }
 

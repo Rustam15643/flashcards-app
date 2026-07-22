@@ -108,11 +108,3 @@
   width: 100%;
 }
 .editRow .input { margin-bottom: 0; flex: 1; }
-
-.empty {
-  text-align: center;
-  color: var(--muted);
-  padding: 60px 24px;
-  font-size: 0.95rem;
-  line-height: 1.7;
-}
