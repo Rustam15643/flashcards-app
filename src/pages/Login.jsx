@@ -1,8 +1,9 @@
 import { useAuth } from "../hooks/useAuth";
+import ErrorBanner from "../components/ErrorBanner";
 import styles from "./Login.module.css";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, authError, clearAuthError } = useAuth();
 
   return (
     <div className={`dot-bg ${styles.wrap}`}>
@@ -19,6 +20,7 @@ export default function Login() {
           </svg>
           Google bilan kirish
         </button>
+        <ErrorBanner message={authError} onDismiss={clearAuthError} />
         <p className={styles.note}>Bepul · Reklama yo'q · Ma'lumotlaringiz xavfsiz</p>
       </div>
     </div>

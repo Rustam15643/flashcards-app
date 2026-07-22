@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getFolders, getWordSets, addWordSet, deleteWordSet } from "../lib/db";
+import ErrorBanner from "../components/ErrorBanner";
 import styles from "./FolderPage.module.css";
 
 function parseWords(text) {
@@ -29,6 +30,7 @@ export default function FolderPage() {
   const [sets, setSets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [error, setError] = useState(null);
 
   // Add form state
   const [title, setTitle] = useState("");
@@ -38,12 +40,19 @@ export default function FolderPage() {
 
   const load = async () => {
     setLoading(true);
-    const folders = await getFolders(user.uid);
-    const f = folders.find(x => x.id === folderId);
-    if (f) setFolderName(f.name);
-    const data = await getWordSets(user.uid, folderId);
-    setSets(data);
-    setLoading(false);
+    setError(null);
+    try {
+      const folders = await getFolders(user.uid);
+      const f = folders.find(x => x.id === folderId);
+      if (f) setFolderName(f.name);
+      const data = await getWordSets(user.uid, folderId);
+      setSets(data);
+    } catch (err) {
+      console.error("Failed to load folder:", err);
+      setError("Ma'lumotlarni yuklab bo'lmadi. Qaytadan urinib ko'ring.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [folderId]);
@@ -56,15 +65,25 @@ export default function FolderPage() {
     const words = parseWords(text);
     if (!title.trim() || words.length === 0) return;
     const lim = parseInt(limit) || words.length;
-    await addWordSet(user.uid, folderId, { title: title.trim(), words, limit: lim });
-    setTitle(""); setText(""); setLimit(""); setShowAdd(false);
-    load();
+    try {
+      await addWordSet(user.uid, folderId, { title: title.trim(), words, limit: lim });
+      setTitle(""); setText(""); setLimit(""); setShowAdd(false);
+      load();
+    } catch (err) {
+      console.error("Failed to add word set:", err);
+      setError("To'plamni saqlab bo'lmadi. Qaytadan urinib ko'ring.");
+    }
   };
 
   const handleDelete = async (setId) => {
     if (!confirm("Bu so'z to'plamini o'chirasizmi?")) return;
-    await deleteWordSet(user.uid, folderId, setId);
-    load();
+    try {
+      await deleteWordSet(user.uid, folderId, setId);
+      load();
+    } catch (err) {
+      console.error("Failed to delete word set:", err);
+      setError("To'plamni o'chirib bo'lmadi. Qaytadan urinib ko'ring.");
+    }
   };
 
   return (
@@ -75,6 +94,8 @@ export default function FolderPage() {
           <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate("/")}>← Orqaga</button>
           <h1 className={styles.title}>📁 {folderName}</h1>
         </header>
+
+        <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
         {/* Add set button */}
         {!showAdd && (

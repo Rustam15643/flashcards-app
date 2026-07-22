@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getFolders, addFolder, renameFolder, deleteFolder } from "../lib/db";
+import ErrorBanner from "../components/ErrorBanner";
 import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
@@ -13,35 +14,58 @@ export default function Dashboard() {
   const [adding, setAdding] = useState(false);
   const [editId, setEditId] = useState(null);
   const [editName, setEditName] = useState("");
+  const [error, setError] = useState(null);
 
   const load = async () => {
     setLoading(true);
-    const data = await getFolders(user.uid);
-    setFolders(data);
-    setLoading(false);
+    setError(null);
+    try {
+      const data = await getFolders(user.uid);
+      setFolders(data);
+    } catch (err) {
+      console.error("Failed to load folders:", err);
+      setError("Papkalarni yuklab bo'lmadi. Qaytadan urinib ko'ring.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleAdd = async () => {
     if (!newName.trim()) return;
-    await addFolder(user.uid, newName.trim());
-    setNewName("");
-    setAdding(false);
-    load();
+    try {
+      await addFolder(user.uid, newName.trim());
+      setNewName("");
+      setAdding(false);
+      load();
+    } catch (err) {
+      console.error("Failed to add folder:", err);
+      setError("Papka qo'shib bo'lmadi. Qaytadan urinib ko'ring.");
+    }
   };
 
   const handleRename = async (id) => {
     if (!editName.trim()) return;
-    await renameFolder(user.uid, id, editName.trim());
-    setEditId(null);
-    load();
+    try {
+      await renameFolder(user.uid, id, editName.trim());
+      setEditId(null);
+      load();
+    } catch (err) {
+      console.error("Failed to rename folder:", err);
+      setError("Papka nomini o'zgartirib bo'lmadi. Qaytadan urinib ko'ring.");
+    }
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Bu papkani o'chirasizmi? Ichidagi barcha so'zlar ham o'chadi!")) return;
-    await deleteFolder(user.uid, id);
-    load();
+    try {
+      await deleteFolder(user.uid, id);
+      load();
+    } catch (err) {
+      console.error("Failed to delete folder:", err);
+      setError("Papkani o'chirib bo'lmadi. Qaytadan urinib ko'ring.");
+    }
   };
 
   return (
@@ -55,6 +79,8 @@ export default function Dashboard() {
           </div>
           <button className="btn btn-ghost" onClick={logout} style={{fontSize:'0.8rem'}}>Chiqish</button>
         </header>
+
+        <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
         {/* Add folder */}
         {adding ? (

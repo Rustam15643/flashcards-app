@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getWordSets, updateWordSet } from "../lib/db";
+import ErrorBanner from "../components/ErrorBanner";
 import styles from "./StudyPage.module.css";
 
 function shuffle(arr) {
@@ -29,15 +30,23 @@ export default function StudyPage() {
   const [isShuffle, setIsShuffle] = useState(false);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     (async () => {
-      const sets = await getWordSets(user.uid, folderId);
-      const s = sets.find(x => x.id === setId);
-      if (!s) return navigate(-1);
-      setWordSet(s);
-      initDeck(s, false, false);
-      setLoading(false);
+      setError(null);
+      try {
+        const sets = await getWordSets(user.uid, folderId);
+        const s = sets.find(x => x.id === setId);
+        if (!s) return navigate(-1);
+        setWordSet(s);
+        initDeck(s, false, false);
+      } catch (err) {
+        console.error("Failed to load word set:", err);
+        setError("So'z to'plamini yuklab bo'lmadi. Qaytadan urinib ko'ring.");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [setId]);
 
@@ -123,6 +132,17 @@ export default function StudyPage() {
   };
 
   if (loading) return <div className="dot-bg"><div className="page" style={{textAlign:'center',paddingTop:80,color:'var(--muted)'}}>Yuklanmoqda...</div></div>;
+
+  if (error) return (
+    <div className="dot-bg">
+      <div className="page">
+        <header className={styles.header}>
+          <button className={`btn btn-ghost ${styles.backBtn}`} onClick={() => navigate(-1)}>← Orqaga</button>
+        </header>
+        <ErrorBanner message={error} />
+      </div>
+    </div>
+  );
 
   const total = wordSet?.words.length || 0;
   const progress = total > 0 ? Math.round((knowCount / total) * 100) : 0;
