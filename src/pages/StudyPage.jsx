@@ -2,16 +2,10 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getWordSets, updateWordSet } from "../lib/db";
+import PageShell from "../components/PageShell";
+import Loading from "../components/Loading";
+import { shuffle, cardKey } from "../lib/utils";
 import styles from "./StudyPage.module.css";
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 export default function StudyPage() {
   const { folderId, setId } = useParams();
@@ -83,7 +77,7 @@ export default function StudyPage() {
 
   const handleAgain = () => {
     const c = deck[index];
-    const key = c.front + "|" + c.back;
+    const key = cardKey(c.front, c.back);
     setAgainIds(prev => new Set([...prev, key]));
     const next = index + 1 >= deck.length ? 0 : index + 1;
     setIndex(next);
@@ -102,7 +96,7 @@ export default function StudyPage() {
   const handleRestartAgain = () => {
     if (!wordSet) return;
     const againWords = wordSet.words.filter(w => {
-      const k = (isReverse ? w.back : w.front) + "|" + (isReverse ? w.front : w.back);
+      const k = isReverse ? cardKey(w.back, w.front) : cardKey(w.front, w.back);
       return againIds.has(k);
     });
     if (!againWords.length) return;
@@ -122,14 +116,13 @@ export default function StudyPage() {
     if (wordSet) initDeck(wordSet, next, isShuffle);
   };
 
-  if (loading) return <div className="dot-bg"><div className="page" style={{textAlign:'center',paddingTop:80,color:'var(--muted)'}}>Yuklanmoqda...</div></div>;
+  if (loading) return <Loading />;
 
   const total = wordSet?.words.length || 0;
   const progress = total > 0 ? Math.round((knowCount / total) * 100) : 0;
 
   return (
-    <div className="dot-bg">
-      <div className="page">
+    <PageShell>
         <header className={styles.header}>
           <button className={`btn btn-ghost ${styles.backBtn}`} onClick={() => navigate(-1)}>← Orqaga</button>
           <h2 className={styles.title}>{wordSet?.title}</h2>
@@ -206,7 +199,6 @@ export default function StudyPage() {
             </div>
           </>
         ) : null}
-      </div>
-    </div>
+    </PageShell>
   );
 }

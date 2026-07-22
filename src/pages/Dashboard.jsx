@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getFolders, addFolder, renameFolder, deleteFolder } from "../lib/db";
+import PageShell from "../components/PageShell";
+import EmptyState from "../components/EmptyState";
+import { LOADING_TEXT } from "../components/Loading";
 import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
@@ -45,8 +48,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dot-bg">
-      <div className="page">
+    <PageShell>
         {/* Header */}
         <header className={styles.header}>
           <div>
@@ -80,12 +82,11 @@ export default function Dashboard() {
 
         {/* Folders list */}
         {loading ? (
-          <div className={styles.empty}>Yuklanmoqda...</div>
+          <EmptyState>{LOADING_TEXT}</EmptyState>
         ) : folders.length === 0 ? (
-          <div className={styles.empty}>
-            <div style={{fontSize:'2.5rem', marginBottom:12}}>🗂️</div>
+          <EmptyState emoji="🗂️">
             <p>Hali papka yo'q.<br/>Birinchi papkangizni yarating!</p>
-          </div>
+          </EmptyState>
         ) : (
           <div className={styles.grid}>
             {folders.map(f => (
@@ -118,7 +119,6 @@ export default function Dashboard() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 }

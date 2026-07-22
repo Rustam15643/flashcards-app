@@ -144,11 +144,3 @@
   transition: opacity 0.15s, background 0.15s;
 }
 .iconBtn:hover { opacity: 1; background: var(--surface2); }
-
-.empty {
-  text-align: center;
-  color: var(--muted);
-  padding: 60px 24px;
-  font-size: 0.95rem;
-  line-height: 1.7;
-}

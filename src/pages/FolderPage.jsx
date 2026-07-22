@@ -2,23 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getFolders, getWordSets, addWordSet, deleteWordSet } from "../lib/db";
+import PageShell from "../components/PageShell";
+import EmptyState from "../components/EmptyState";
+import { LOADING_TEXT } from "../components/Loading";
+import { parseWords } from "../lib/utils";
 import styles from "./FolderPage.module.css";
-
-function parseWords(text) {
-  const lines = text.split("\n");
-  const result = [];
-  for (const line of lines) {
-    const t = line.trim();
-    if (!t) continue;
-    const sep = t.includes(" - ") ? " - " : t.includes(":") ? ":" : null;
-    if (!sep) continue;
-    const idx = t.indexOf(sep);
-    const front = t.slice(0, idx).trim();
-    const back = t.slice(idx + sep.length).trim();
-    if (front && back) result.push({ front, back });
-  }
-  return result;
-}
 
 export default function FolderPage() {
   const { folderId } = useParams();
@@ -68,8 +56,7 @@ export default function FolderPage() {
   };
 
   return (
-    <div className="dot-bg">
-      <div className="page">
+    <PageShell>
         {/* Header */}
         <header className={styles.header}>
           <button className={`btn btn-ghost ${styles.back}`} onClick={() => navigate("/")}>← Orqaga</button>
@@ -139,12 +126,11 @@ export default function FolderPage() {
 
         {/* Sets list */}
         {loading ? (
-          <div className={styles.empty}>Yuklanmoqda...</div>
+          <EmptyState>{LOADING_TEXT}</EmptyState>
         ) : sets.length === 0 && !showAdd ? (
-          <div className={styles.empty}>
-            <div style={{fontSize:'2.5rem', marginBottom:12}}>📝</div>
+          <EmptyState emoji="📝">
             <p>Bu papkada hali so'z yo'q.<br/>Yangi to'plam qo'shing!</p>
-          </div>
+          </EmptyState>
         ) : (
           <div className={styles.list}>
             {sets.map(s => (
@@ -167,7 +153,6 @@ export default function FolderPage() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 }
